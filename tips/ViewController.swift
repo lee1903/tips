@@ -9,7 +9,9 @@
 import UIKit
 
 class ViewController: UIViewController, UITextFieldDelegate{
-
+    
+    
+    //creates IBOutlets for views, labels, fields etc
     @IBOutlet weak var tipControl: UISegmentedControl!
     @IBOutlet weak var billField: CustomTextField!
     @IBOutlet weak var tipLabel: UILabel!
@@ -30,18 +32,18 @@ class ViewController: UIViewController, UITextFieldDelegate{
     @IBOutlet weak var billView: UIView!
     @IBOutlet weak var tipView: UIView!
     
-    var firstLoad = true
+    var firstLoad = true//variable for whether to first stage is loaded or not
     var currency = "$$"
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         let defaults = NSUserDefaults.standardUserDefaults()
         let defaultTip = defaults.integerForKey("Default Tip")
-        tipControl.selectedSegmentIndex = defaultTip
+        tipControl.selectedSegmentIndex = defaultTip//sets tip control to default tip in settings
         
         let formatter = NSNumberFormatter()
         formatter.numberStyle = .CurrencyStyle
-        formatter.locale = NSLocale.currentLocale()
+        formatter.locale = NSLocale.currentLocale()//retrieves default currency from user settings
         currency = formatter.currencySymbol
     }
     
@@ -49,8 +51,9 @@ class ViewController: UIViewController, UITextFieldDelegate{
         super.viewDidLoad()
         billField.delegate = self
         
-        initialStage()
+        initialStage()//loads initial stage
         
+        //adds gesture listeners to my view for gesture commands; on top of bill field
         let swipeDown = UISwipeGestureRecognizer(target: self, action: "respondToSwipeGesture:")
         swipeDown.direction = UISwipeGestureRecognizerDirection.Down
         self.gestureView.addGestureRecognizer(swipeDown)
@@ -80,6 +83,7 @@ class ViewController: UIViewController, UITextFieldDelegate{
     func respondToSwipeGesture(gesture: UIGestureRecognizer) {
         if let swipeGesture = gesture as? UISwipeGestureRecognizer {
             
+            //sets stage accordingly when swipe up or down
             switch swipeGesture.direction {
             case UISwipeGestureRecognizerDirection.Down:
                 if(!firstLoad){
@@ -96,10 +100,11 @@ class ViewController: UIViewController, UITextFieldDelegate{
     }
     
     func respondToTapGesture(gesture: UIGestureRecognizer){
-        self.billField.becomeFirstResponder()
+        self.billField.becomeFirstResponder()//tapping on gesture view (esentially tapping bill field) loads keyboard
     }
     
     func initialStage(){
+        //sets values and animations for initial stage
         self.tipView.alpha = 0
         self.costLabel.alpha = 0
         self.titleLabel.alpha = 1
@@ -116,6 +121,7 @@ class ViewController: UIViewController, UITextFieldDelegate{
     }
     
     func returnfirstStage(){
+        //sets values and animations for when returning to first stage from second stage
         resetFields()
         firstLoad = true
         view.endEditing(true)
@@ -133,6 +139,7 @@ class ViewController: UIViewController, UITextFieldDelegate{
     }
     
     func secondStage(){
+        //sets values and animations for when transitioning to second stage
         firstLoad = false
         UIView.animateWithDuration(0.30, animations: {
             self.titleLabel.frame.origin.y = self.titleLabel.frame.origin.y - 300
@@ -148,6 +155,7 @@ class ViewController: UIViewController, UITextFieldDelegate{
     }
     
     func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
+        //uses delegate to restrict how many digits in the bill field
         let currentCharacterCount = textField.text?.characters.count ?? 0
         if (range.length + range.location > currentCharacterCount){
             return false
@@ -160,6 +168,7 @@ class ViewController: UIViewController, UITextFieldDelegate{
     }
     
     func resetFields(){
+        //resets all fields
         let billAmount = 0.0
         
         let tip = 0.0
@@ -173,6 +182,7 @@ class ViewController: UIViewController, UITextFieldDelegate{
     }
     
     func currencyMask(d: Double) -> Double{
+        //cleans user input, forces into the format $0.00
         var str = ""
         if(d > 9 && d < 100){
             let i:Int = Int(d)
@@ -195,6 +205,7 @@ class ViewController: UIViewController, UITextFieldDelegate{
     }
     
     func valueOfBillField() -> Int{
+        //retrieves the value of the bill field with disregard to decimals
         let rawInput = NSString(string:billField.text!)
         var cleanInput = NSString(string:rawInput.substringFromIndex(1))
         cleanInput = cleanInput.stringByReplacingOccurrencesOfString(".", withString: "")
@@ -203,20 +214,22 @@ class ViewController: UIViewController, UITextFieldDelegate{
     }
     
     @IBAction func beginEdit(sender: AnyObject) {
+        //when beginning to edit, if first stage loaded, reset bill field
         if firstLoad{
             billField.text = "\(self.currency)0.00"
         }
     }
     
     @IBAction func tipSelectorValueChanged(sender: AnyObject) {
+        //when clicking on tip selector, hides keyboard
         view.endEditing(true)
     }
     
     @IBAction func onEditingChanged(sender: AnyObject) {
         if firstLoad && (valueOfBillField() != 0){
-            secondStage()
+            secondStage()//loads second stage when user inputs numbers in first stage
         }
-        let tipPercentages = [0.10, 0.15, 0.2, 0.25]
+        let tipPercentages = [0.10, 0.15, 0.2, 0.25]//sets tip percentages
         let tipPercent = tipPercentages[tipControl.selectedSegmentIndex]
         
         let rawInput = NSString(string:billField.text!)
@@ -228,7 +241,8 @@ class ViewController: UIViewController, UITextFieldDelegate{
             
         let tip = billAmount * tipPercent
         let total = billAmount + tip
-            
+        
+        //loads all labels
         tipLabel.text = String(format: "\(self.currency)%.2f", tip)
         totalLabel.text = String(format: "\(self.currency)%.2f", total)
         totalTwoLabel.text = String(format: "\(self.currency)%.2f", total/2)
@@ -238,6 +252,7 @@ class ViewController: UIViewController, UITextFieldDelegate{
 
     @IBAction func onTap(sender: AnyObject) {
         if !firstLoad{
+            //tapping outside bill field hides keyboard
             view.endEditing(true)
         }
     }

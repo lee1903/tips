@@ -15,7 +15,7 @@ class SettingsViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let defaults = NSUserDefaults.standardUserDefaults()
+        let defaults = NSUserDefaults.standardUserDefaults()//sets default tip on segmented control
         let defaultTip = defaults.integerForKey("Default Tip")
         defaultTipControl.selectedSegmentIndex = defaultTip
         // Do any additional setup after loading the view.
@@ -27,10 +27,10 @@ class SettingsViewController: UIViewController {
     }
     
     @IBAction func backAction(sender: AnyObject) {
-        let defaults = NSUserDefaults.standardUserDefaults()
+        let defaults = NSUserDefaults.standardUserDefaults()//stores default tip into settings
         defaults.setInteger(defaultTipControl.selectedSegmentIndex, forKey: "Default Tip")
         defaults.synchronize()
-        self.dismissViewControllerAnimated(true, completion: nil)
+        self.dismissViewControllerAnimated(true, completion: nil)//dismisses controller
     }
     
 

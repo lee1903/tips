@@ -11,6 +11,7 @@ import UIKit
 
 class CustomTextField: UITextField {
     
+    //creates subclass of UITextfield that hides cursor and disables copy and paste
     override func caretRectForPosition(position: UITextPosition) -> CGRect{
         return CGRect.zero
     }
